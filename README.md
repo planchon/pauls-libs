@@ -3,7 +3,7 @@ A basic C++ and Python grouping all the maths, drawing, networking and neural'in
 **It is my programming swiss knife.**
 
 ### Maths
- - [ ] Vectors
+ - [x] Vectors
  - [ ] Matrices
  - [ ] Linear Algebra
  - [ ] Matrice Operations
