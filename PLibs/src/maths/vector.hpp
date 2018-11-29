@@ -27,7 +27,7 @@ namespace plibs {
 			for(int i = 0; i < size; i++)
 				data[i] = liste[i];
 		}
-
+		
 		friend std::ostream& operator << (std::ostream& stream, const Vector<T, _Cols>& vec) {
 			std::cout << "[";
 			for (int i = 0; i < _Cols - 1; i++) {
@@ -45,6 +45,10 @@ namespace plibs {
 			return finalVec;
 		}
 
+		friend Vector<T, _Cols> operator += (const Vector<T, _Cols>& vec1, const Vector<T, _Cols>& vec2) {
+			return vec1 + vec2;
+		}
+		
 		friend Vector<T, _Cols> operator - (const Vector<T, _Cols>& vec1, const Vector<T, _Cols>& vec2) {
 			Vector<T, _Cols> finalVec;
 			for (int i = 0; i < _Cols; i++) {
@@ -53,6 +57,11 @@ namespace plibs {
 
 			return finalVec;
 		}
+
+		friend Vector<T, _Cols> operator -= (const Vector<T, _Cols>& vec1, const Vector<T, _Cols>& vec2) {
+			return vec1 - vec2;
+		}
+		
 
 		friend Vector<T, _Cols> operator * (const Vector<T, _Cols>& vec1, const T lambda) {
 			Vector<T, _Cols> finalVec;
@@ -63,10 +72,13 @@ namespace plibs {
 			return finalVec;
 		}
 
-		template<typename L>
-		friend Vector<T, _Cols> operator / (const Vector<T, _Cols>& vec1, const L lambda) {
+		friend Vector<T, _Cols> operator *= (const Vector<T, _Cols>& vec1, const T lambda) {
+			return vec1 * lambda;
+		}
+
+		friend Vector<T, _Cols> operator / (const Vector<T, _Cols>& vec1, const T lambda) {
 			if (lambda != 0) {
-				Vector<L, _Cols> finalVec;
+				Vector<T, _Cols> finalVec;
 				for (int i = 0; i < _Cols; i++) {
 					finalVec.data[i] = vec1.data[i] / lambda;
 				}
@@ -77,6 +89,11 @@ namespace plibs {
 			}
 		}
 
+		friend Vector<T, _Cols> operator /= (const Vector<T, _Cols>& vec1, const T lambda) {
+			return vec1 / lambda;
+		}
+
+		
 		// dot product here
 		friend T operator * (const Vector<T, _Cols>& vec1, const Vector<T, _Cols>& vec2) {
 			T dot = 0;
