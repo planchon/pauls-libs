@@ -1,0 +1,4 @@
+template<typename T, int N>
+int size(T (&arr)[N]){
+	return sizeof(arr) / sizeof(arr[0]);
+}
