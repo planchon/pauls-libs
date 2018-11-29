@@ -1,0 +1,5 @@
+CC=gcc
+FLAGS=-std=c++11
+
+testVector:
+	$(CC) $(FLAGS) maths/vector.hpp test/maths/testVector.cpp -o bin/testVector
