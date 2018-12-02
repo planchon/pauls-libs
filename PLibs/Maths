@@ -1,5 +1,6 @@
 #include <iostream>
 
 #include "Vector"
+#include "Matrix"
 
 #define PLIBS_MATH_IMPORT

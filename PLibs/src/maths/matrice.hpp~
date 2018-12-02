@@ -1,0 +1,154 @@
+#ifndef PL_MATRIX_H
+#define PL_MATRIX_H
+
+extern "C"
+{
+       #include <cblas.h>
+}
+
+namespace plibs {
+	template<typename T, int _Cols, int _Rows>
+	struct Matrix {
+		T data[_Cols][_Rows] = {0};
+
+		Matrix () {
+			if (_Cols == _Rows) {
+				for (int i = 0; i < _Cols; i++)
+					data[i][i] = 1;
+			}
+		}
+
+		Matrix (std::vector<std::vector<T>> base) {
+			if (base.size() != _Cols || base.at(0).size() != _Rows) {
+				throw std::invalid_argument("PLIBS ERROR : You can't initalize Matrice with vector of different dimension");
+			}
+
+			for(int i = 0; i < _Cols; i++)
+				for(int j = 0; j < _Rows; j++) 
+					data[i][j] = base.at(i).at(j);
+		}
+
+		Matrix (T liste[_Cols][_Rows]) {
+			for(int i = 0; i < _Cols; i++)
+				for(int j = 0; j < _Rows; j++)
+					data[i][j] = liste[i][j];
+		}
+
+		friend std::ostream& operator << (std::ostream& stream, const Matrix<T, _Cols, _Rows>& mat) {
+			// on cherche le nombre le plus grand (en taille) nombre
+			int max = -1000000;
+			for (int i = 0; i < _Cols * _Rows; i++) {
+				if (abs(mat.data[i / _Cols][i % _Rows]) > max) {
+					max = mat.data[i % _Cols][i / _Rows];
+				}
+			}
+
+			int maxIntSize = 0;
+			(max < 0) ? maxIntSize = floor(log10(-max)) + 1: maxIntSize = floor(log10(max));
+			
+			std::cout << "[";
+			for (int i = 0; i < _Cols; i++) {
+				(i == 0) ? std::cout << "[" : std::cout << " [";
+				for (int j = 0; j < _Rows; j++) {
+					std::cout << mat.data[i][j];
+					for (int k = floor(log10(mat.data[i][j])); k < maxIntSize; k++)
+						std::cout << " ";
+					(j == _Rows - 1) ? std::cout << "" : std::cout << " ";
+				}
+				(i == _Cols - 1) ? std::cout << "]" : std::cout << "]\n";
+			}
+			std::cout << "]";
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator + (Matrix<T, _Cols, _Rows>& mat1, Matrix<T, _Cols, _Rows>& mat2) {
+			Matrix<T, _Cols, _Rows> mat;
+			for (int i = 0; i < _Cols; i++)
+				for (int j = 0; j < _Rows; j++)
+					mat.data[i][j] = mat1.data[i][j] + mat2.data[i][j];
+			return mat;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator += (Matrix<T, _Cols, _Rows>& mat1, Matrix<T, _Cols, _Rows>& mat2) {
+			return mat1 + mat2;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator - (Matrix<T, _Cols, _Rows>& mat1, Matrix<T, _Cols, _Rows>& mat2) {
+			Matrix<T, _Cols, _Rows> mat;
+			for (int i = 0; i < _Cols; i++)
+				for (int j = 0; j < _Rows; j++)
+					mat.data[i][j] = mat1.data[i][j] - mat2.data[i][j];
+			return mat;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator -= (Matrix<T, _Cols, _Rows>& mat1, Matrix<T, _Cols, _Rows>& mat2) {
+			return mat1 - mat2;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator * (Matrix<T, _Cols, _Rows>& mat1, T lambda) {
+			Matrix<T, _Cols, _Rows> mat;
+			for (int i = 0; i < _Cols; i++)
+				for (int j = 0; j < _Rows; j++)
+					mat.data[i][j] = mat1.data[i][j] * lambda;
+			return mat;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator *= (Matrix<T, _Cols, _Rows>& mat1, T lambda) {
+			return mat1 * lambda;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator / (Matrix<T, _Cols, _Rows>& mat1, T lambda) {
+			if (lambda == 0) {
+				throw std::invalid_argument("PLIBS ERROR : Division by 0");
+			}
+			Matrix<T, _Cols, _Rows> mat;
+			for (int i = 0; i < _Cols; i++)
+				for (int j = 0; j < _Rows; j++)
+					mat.data[i][j] = mat1.data[i][j] * lambda;
+			return mat;
+		}
+
+		friend Matrix<T, _Cols, _Rows> operator /= (Matrix<T, _Cols, _Rows>& mat1, T lambda) {
+			return mat1 / lambda;
+		}
+
+		// Matrix multiplication using BLAS for speed
+		template<int _Cols1,int _Cols2,int _Rows1,int _Rows2>
+		friend Matrix& operator * (Matrix<T, _Cols1, _Rows1>& mat1, Matrix<T, _Cols2, _Rows2>& mat2) {
+			double *A, *B, *C;
+			int m, n, k, i, j;
+			double alpha, beta;
+
+			m = _Cols1;
+			n = _Rows2;
+			k = _Rows1;
+
+			alpha = 1.0;
+			beta  = 1.0;
+
+			A = (double *) malloc(m*k*sizeof(double));
+			B = (double *) malloc(k*n*sizeof(double));
+			C = (double *) malloc(m*n*sizeof(double));
+
+			for(int i = 0; i < _Cols1; i++)
+				for(int j = 0; j < _Rows1; j++)
+					A[i + j * _Rows1] = (double) mat1.data[i][j];
+
+			for(int i = 0; i < _Cols2; i++)
+				for(int j = 0; j < _Rows2; j++)
+					B[i + j * _Rows1] = (double) mat2.data[i][j];
+			
+			// MAGIE, jk blas lib
+			cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, m, n, k, alpha, A, k, B, n, beta, C, n);
+
+			Matrix<T, _Cols1, _Rows2> finalMat;
+
+			for(int i = 0; i < m; i++)
+				for(int j = 0; j < n; j++)
+					finalMat.data[i][j] = C[i + j * n];
+			
+			return finalMat;
+		}
+	};
+}
+
+#endif

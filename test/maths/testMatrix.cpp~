@@ -1,0 +1,8 @@
+#include <PLibs/Maths>
+
+int main() {
+	plibs::Matrix<int, 2, 3> matrice ({{1,2,3},{1,2,3}});
+	plibs::Matrix<int, 3, 2> matrice2({{1,2,3},{1,2,3}});
+	std::cout << matrice * matrice2 << std::endl;
+	return 0;
+}
