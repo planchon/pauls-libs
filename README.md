@@ -7,8 +7,12 @@ A basic C++ and Python grouping all the maths, drawing, networking and neural'in
 ### Maths
  - [x] Vectors
  - [ ] Matrices
- - [ ] Linear Algebra
- - [ ] Matrice Operations
+   - [ ] gemm
+   - [ ] symm
+   - [ ] syrk
+   - [ ] syr2k
+   - [ ] trmm
+   - [ ] trsm
 ### Drawing
  - [ ] Drawing pixel on 2D screen
  - [ ] Line / Basic shape drawing algo
